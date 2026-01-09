@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扫码一键复制</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        #reader { width: 300px; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; }
+        #result-container { margin-top: 20px; padding: 15px; border: 1px solid #eee; width: 300px; text-align: center; display: none; }
+        #scanned-result { word-break: break-all; color: #333; background: #f9f9f9; padding: 10px; border-radius: 4px; }
+        button { margin-top: 10px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:active { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <h2>扫码识别内容</h2>
+    
+    <div id="reader"></div>
+
+    <div id="result-container" id="result-box">
+        <strong>识别结果：</strong>
+        <p id="scanned-result"></p>
+        <button onclick="copyToClipboard()">一键复制内容</button>
+    </div>
+
+    <script>
+        const resultContainer = document.getElementById('result-container');
+        const resultText = document.getElementById('scanned-result');
+
+        // 初始化扫码器
+        const html5QrCode = new Html5Qrcode("reader");
+        
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+        // 成功回调
+        const onScanSuccess = (decodedText, decodedResult) => {
+            // 停止扫码（如果只需要识别一次，可以暂停或停止）
+            // html5QrCode.stop(); 
+            
+            // 显示结果区域并填充内容
+            resultContainer.style.display = 'block';
+            resultText.innerText = decodedText;
+        };
+
+        // 启动摄像头
+        html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+            .catch(err => {
+                console.error("无法启动摄像头: ", err);
+                alert("请确保已授权摄像头权限，且环境为 HTTPS。");
+            });
+
+        // 复制到剪贴板功能
+        function copyToClipboard() {
+            const text = resultText.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("内容已复制到剪贴板！");
+            }).catch(err => {
+                alert("复制失败，请手动选择复制。");
+            });
+        }
+    </script>
+</body>
+</html>
